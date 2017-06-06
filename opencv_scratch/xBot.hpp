@@ -14,8 +14,9 @@
 
 double  xbot_resize(cv::Mat img, cv::Mat *img_resized);
 cv::Mat xbot_detectEdge(cv::Mat img);
-void    xbot_findScreenFrame(cv::Mat img_edge);
+std::vector<cv::Point>    xbot_findScreenFrame(cv::Mat img_edge);
 void    xbot_sortByArea(std::vector<std::vector<cv::Point> > arr, int lo, int hi);
 int     xbot_partition(std::vector<std::vector<cv::Point> > arr, int lo, int hi);
+std::vector<cv::Point> xbot_orderpts(cv::Mat img, std::vector<cv::Point> rect);
 
 #endif /* xBot_hpp */

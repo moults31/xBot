@@ -17,9 +17,6 @@
 #include <opencv2/opencv.hpp>
 #include "xbot.hpp"
 
-
-
-
 int main(int argc, const char * argv[])
 {
     cv::Mat img = cv::imread("/Users/moults31/GoogleDrive/secret_hax/IMG_0419.png");
@@ -29,8 +26,17 @@ int main(int argc, const char * argv[])
     
     cv::Mat img_edge = xbot_detectEdge(img_resized);
     
-    xbot_findScreenFrame(img_edge);
+    std::vector<cv::Point> rect = xbot_findScreenFrame(img_edge);
     
+    for(int i = 0; i < rect.size(); i++)
+    {
+        rect[i].x /= ratio;
+        rect[i].y /= ratio;
+    }
+    
+    std::vector<cv::Point> rect_ordered = xbot_orderpts(img, rect);
+    
+    cvWaitKey(0);
     cv::destroyAllWindows();
     return 0;
 }

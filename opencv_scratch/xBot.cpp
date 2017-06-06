@@ -85,8 +85,10 @@ struct
  * Brief:     Find rectangle corresponding to tv screen frame
  *
  * Param img_edge: Edge grayscale image
+ *
+ * Return: Vector that defines the tv screen corners.
  */
-void xbot_findScreenFrame(const cv::Mat img_edge)
+std::vector<cv::Point> xbot_findScreenFrame(const cv::Mat img_edge)
 {
     cv::Mat img = img_edge.clone();
     
@@ -116,7 +118,7 @@ void xbot_findScreenFrame(const cv::Mat img_edge)
     cv::drawContours(img, cnts, contourIdx, color, 5, 8);
     cv::imshow("Outline", img);
     
-    cvWaitKey(0);
+    return approx;
 }
 
 /**********************************************************************
@@ -124,29 +126,70 @@ void xbot_findScreenFrame(const cv::Mat img_edge)
  **********************************************************************
  */
 
-///* xbot_perspectiveXform
-// *
-// * Brief:     Transform perspective to fill image with "tv screen"
-// *
-// * Param img: Raw photograph
-// */
-//void xbot_perspectiveXform(cv::Mat img, std::vector<cv::Point> rect)
-//{
-//    cv::Mat img = img_edge.clone();
-//    
-//    
-//}
-//
-///* xbot_orderpts
-// *
-// * Brief:     Order points in the point vector that defines the tv screen corners.
-//  
-// *
-// * Param img: Raw photograph
-// */
-//void xbot_perspectiveXform(cv::Mat img, std::vector<cv::Point> rect)
-//{
-//    cv::Mat img = img_edge.clone();
-//    
-//    
-//}
+/* xbot_perspectiveXform
+ *
+ * Brief:     Transform perspective to fill image with "tv screen"
+ *
+ * Param img: Raw photograph
+ */
+void xbot_perspectiveXform(cv::Mat img, std::vector<cv::Point> rect)
+{
+    
+    
+    
+}
+
+/* xbot_orderpts
+ *
+ * Brief:     Order points in the point vector that defines the tv screen corners.
+ *
+ * Param img: Raw photograph
+ * Param rect: Vector that defines the tv screen corners.
+ *
+ * Return rect_ordered: rect but with points in the order top-left, top-right, bottom-right, bottom-left
+ */
+std::vector<cv::Point> xbot_orderpts(cv::Mat img, std::vector<cv::Point> rect)
+{
+    std::vector<cv::Point> rect_ordered;
+    rect_ordered.reserve(4);
+    
+    //Initialize these with data from idx 0
+    int sum_max  = rect[0].x + rect[0].y;
+    int sum_min  = rect[0].x + rect[0].y;
+    int diff_max = rect[0].x - rect[0].y;
+    int diff_min = rect[0].x - rect[0].y;
+    
+    int idx_sum_max = 0;
+    int idx_sum_min = 0;
+    int idx_diff_max = 0;
+    int idx_diff_min = 0;
+    
+    
+    for(int i = 0; i < rect.size(); i++)
+    {
+        //Update max/min sum/diff if appropriate on this iteration.
+        sum_max   = std::max(rect[i].x + rect[i].y, sum_max);
+        sum_min   = std::min(rect[i].x + rect[i].y, sum_min);
+        diff_max  = std::max(rect[i].x - rect[i].y, diff_max);
+        diff_min  = std::min(rect[i].x - rect[i].y, diff_min);
+        
+        //If we updated one on this iteration, save which iteration we were on.
+        //After all 4 iterations, these 4 values should be all different and in [0,3]
+        idx_sum_max  = (sum_max == rect[i].x + rect[i].y)  ? i : idx_sum_max;
+        idx_sum_min  = (sum_min == rect[i].x + rect[i].y)  ? i : idx_sum_min;
+        idx_diff_max = (diff_max == rect[i].x - rect[i].y) ? i : idx_diff_max;
+        idx_diff_min = (diff_min == rect[i].x - rect[i].y) ? i : idx_diff_min;
+    }
+
+    //Order the output vector appropriately:
+    //Top-left has smallest sum
+    //Bottom-right has largest sum
+    //Top-right has smallest difference
+    //Bottom-left has largest difference
+    rect_ordered[0] = rect[idx_sum_min];
+    rect_ordered[1] = rect[idx_diff_min];
+    rect_ordered[2] = rect[idx_sum_max];
+    rect_ordered[3] = rect[idx_diff_max];
+    
+    return rect_ordered;
+}
