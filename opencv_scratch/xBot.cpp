@@ -51,18 +51,22 @@ double xbot_resize(cv::Mat img, cv::Mat *img_resized)
  */
 cv::Mat xbot_detectEdge(cv::Mat img)
 {
+    //Display original image for reference
     cv::Mat img_bw = img.clone(), img_blur = img.clone(), img_edge = img.clone();
     cv::namedWindow("Raw", CV_WINDOW_AUTOSIZE);
     cv::imshow("Raw", img );
     
+    //Convert from RGB to grayscale
     cv::cvtColor(img, img_bw, CV_RGB2GRAY);
     cv::namedWindow("BW", CV_WINDOW_AUTOSIZE);
     cv::imshow("BW", img_bw );
     
+    //Apply a Gaussian low-pass "blurring" filter
     cv::GaussianBlur(img_bw, img_blur, cv::Size(5,5), 0);
     cv::namedWindow("Blur", CV_WINDOW_AUTOSIZE);
     cv::imshow("Blur", img_blur );
     
+    //Apply a Canny edge detection filter
     cv::Canny(img_blur, img_edge, 75, 200);
     cv::namedWindow("Edge", CV_WINDOW_AUTOSIZE);
     cv::imshow("Edge", img_edge );
@@ -72,13 +76,18 @@ cv::Mat xbot_detectEdge(cv::Mat img)
     return img_edge;
 }
 
+/* xbot_areaComp
+ *
+ * Brief:     Struct for use with std::sort only within xbot_findScreenFrame
+ *            Returns true if area within contour a is greater than that within contour b
+ */
 struct
 {
     bool operator()(std::vector<cv::Point> a, std::vector<cv::Point> b) const
     {
         return cv::contourArea(a) > cv::contourArea(b);
     }
-} areaComp;
+} xbot_areaComp;
 
 /* xbot_findScreenFrame
  *
@@ -90,6 +99,11 @@ struct
  */
 std::vector<cv::Point> xbot_findScreenFrame(const cv::Mat img)
 {
+    int contourIdx = 0;
+    double peri;
+    std::vector<cv::Point> approx, rect;
+    std::vector<std::vector<cv::Point> > cnts;
+    
     //Resize image to 500px width
     cv::Mat img_resized = img.clone();
     double ratio = xbot_resize(img, &img_resized);
@@ -97,15 +111,12 @@ std::vector<cv::Point> xbot_findScreenFrame(const cv::Mat img)
     //Filter image with Canny edge detector
     cv::Mat img_edge = xbot_detectEdge(img_resized);
     
-    std::vector<std::vector<cv::Point> > cnts;
+    //Find all contours in edge image and sort by area in descending order
     cv::findContours(img_edge, cnts, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+    std::sort(cnts.begin(), cnts.end(), xbot_areaComp);
     
-    std::sort(cnts.begin(), cnts.end(), areaComp);
-    
-    double peri;
-    std::vector<cv::Point> approx, rect;
-    int contourIdx;
-    
+    //Loop through contours and stop as soon as we find one with 4 sides.
+    //We assume that the largest 4-sided contour is the frame of our tv screen.
     for(size_t c = 0; c < cnts.size(); c++)
     {
         peri = cv::arcLength(cnts[c], true);
@@ -120,19 +131,27 @@ std::vector<cv::Point> xbot_findScreenFrame(const cv::Mat img)
         }
     }
     
-    for(int i = 0; i < cnts[contourIdx].size(); i++)
+    //Resize the contour we found to match og image size
+    for(int i = 0; i < approx.size(); i++)
     {
-        cnts[contourIdx][i].x /= ratio;
-        cnts[contourIdx][i].y /= ratio;
+        //report pts for resized (500px width) image
+        std::cout << approx[i];
+        std::cout << "  ";
+        
+        approx[i].x /= ratio;
+        approx[i].y /= ratio;
+        
+        //report pts for og size image
+        std::cout << approx[i];
+        std::cout << "\n";
     }
     
+    //Display contour superimposed on edge image
     cv::Scalar color = cv::Scalar( 255, 255, 255 );
-    cv::drawContours(img, cnts, contourIdx, color, 5, 8);
-    cv::imshow("Outline", img);
+    cv::drawContours(img_edge, cnts, contourIdx, color, 5, 8);
+    cv::imshow("Outline", img_edge);
     
-    rect = approx;
-    
-    return rect;
+    return approx;
 }
 
 /**********************************************************************
