@@ -7,6 +7,7 @@
 //
 
 #include "xBot.hpp"
+#include <math.h>
 
 /******************************************************
  * Algorithm done in 3 steps:
@@ -15,7 +16,6 @@
  * 3) Read text from tv screen
  ******************************************************
  */
-
 
 /******************************************************
  * METHODS FOR 1) DETECT EDGE OF TV SCREEN
@@ -97,11 +97,11 @@ struct
  *
  * Return: Vector that defines the tv screen corners.
  */
-std::vector<cv::Point> xbot_findScreenFrame(const cv::Mat img)
+std::vector<cv::Point2f> xbot_findScreenFrame(const cv::Mat img)
 {
     int contourIdx = 0;
     double peri;
-    std::vector<cv::Point> approx, rect;
+    std::vector<cv::Point2f> approx, rect;
     std::vector<std::vector<cv::Point> > cnts;
     
     //Resize image to 500px width
@@ -125,8 +125,6 @@ std::vector<cv::Point> xbot_findScreenFrame(const cv::Mat img)
         if( approx.size() == 4)
         {
             contourIdx = (int)c;
-            std::cout << "\n";
-            std::cout << contourIdx;
             break;
         }
     }
@@ -134,16 +132,8 @@ std::vector<cv::Point> xbot_findScreenFrame(const cv::Mat img)
     //Resize the contour we found to match og image size
     for(int i = 0; i < approx.size(); i++)
     {
-        //report pts for resized (500px width) image
-        std::cout << approx[i];
-        std::cout << "  ";
-        
         approx[i].x /= ratio;
         approx[i].y /= ratio;
-        
-        //report pts for og size image
-        std::cout << approx[i];
-        std::cout << "\n";
     }
     
     //Display contour superimposed on edge image
@@ -164,12 +154,54 @@ std::vector<cv::Point> xbot_findScreenFrame(const cv::Mat img)
  * Brief:     Transform perspective to fill image with "tv screen"
  *
  * Param img: Raw photograph
+ *
+ * Return:    Image with "tv screen" filling the image
  */
-void xbot_perspectiveXform(cv::Mat img, std::vector<cv::Point> rect)
+cv::Mat xbot_perspectiveXform(const cv::Mat img, std::vector<cv::Point2f> rect)
 {
+    //Rearrange contour to the proper order
+    std::vector<cv::Point2f> rect_ordered = xbot_orderpts(rect);
     
+    //Create a separate variable for each corner for clarity
+    cv::Point tl = rect_ordered[0];
+    cv::Point tr = rect_ordered[1];
+    cv::Point br = rect_ordered[2];
+    cv::Point bl = rect_ordered[3];
     
+    //We need to first get the height and width of our new image.
+    //Width will be the greater distance between bl->br or tl->tr
+    float widthA = sqrt(pow(std::abs(br.x-bl.x),2) + pow(std::abs(br.y - bl.y),2));
+    float widthB = sqrt(pow(std::abs(tr.x-tl.x),2) + pow(std::abs(tr.y - tl.y),2));
+    float width = std::max(widthA,widthB);
     
+    //Similarly height is greater distance between tl->bl or tr->br
+    float heightA = sqrt(pow(std::abs(tl.x-bl.x),2) + pow(std::abs(tl.y - bl.y),2));
+    float heightB = sqrt(pow(std::abs(tr.x-br.x),2) + pow(std::abs(tr.y - br.y),2));
+    float height = std::max(heightA,heightB);
+    
+    //Now we define a vector with the 4 pts representing our new image corners
+    std::vector<cv::Point2f> dst = rect_ordered;
+    dst.reserve(4);
+    
+    //Set the 4 corners in the same order as before (tl->tr->br->bl)
+    dst[0].x = 0;
+    dst[0].y = 0;
+    dst[1].y = width - 1;
+    dst[1].x = 0;
+    dst[2].y = width - 1;
+    dst[2].x = height - 1;
+    dst[3].y = 0;
+    dst[3].x = height - 1;
+    
+    //Use our contour and the new matrix to do a perspective transform
+    cv::Mat M = cv::getPerspectiveTransform(rect_ordered, dst);
+    cv::Mat img_warped;
+    cv::warpPerspective(img, img_warped, M, cv::Size(height,width));
+    
+    //Display the final product
+    cv::imshow("Warped", img_warped);
+    
+    return img_warped;
 }
 
 /* xbot_orderpts
@@ -181,16 +213,16 @@ void xbot_perspectiveXform(cv::Mat img, std::vector<cv::Point> rect)
  *
  * Return rect_ordered: rect but with points in the order top-left, top-right, bottom-right, bottom-left
  */
-std::vector<cv::Point> xbot_orderpts(cv::Mat img, std::vector<cv::Point> rect)
+std::vector<cv::Point2f> xbot_orderpts(std::vector<cv::Point2f> rect)
 {
-    std::vector<cv::Point> rect_ordered;
+    std::vector<cv::Point2f> rect_ordered = rect;
     rect_ordered.reserve(4);
     
     //Initialize these with data from idx 0
-    int sum_max  = rect[0].x + rect[0].y;
-    int sum_min  = rect[0].x + rect[0].y;
-    int diff_max = rect[0].x - rect[0].y;
-    int diff_min = rect[0].x - rect[0].y;
+    float sum_max  = rect[0].x + rect[0].y;
+    float sum_min  = rect[0].x + rect[0].y;
+    float diff_max = rect[0].x - rect[0].y;
+    float diff_min = rect[0].x - rect[0].y;
     
     int idx_sum_max = 0;
     int idx_sum_min = 0;
@@ -201,10 +233,10 @@ std::vector<cv::Point> xbot_orderpts(cv::Mat img, std::vector<cv::Point> rect)
     for(int i = 0; i < rect.size(); i++)
     {
         //Update max/min sum/diff if appropriate on this iteration.
-        sum_max   = std::max(rect[i].x + rect[i].y, sum_max);
-        sum_min   = std::min(rect[i].x + rect[i].y, sum_min);
-        diff_max  = std::max(rect[i].x - rect[i].y, diff_max);
-        diff_min  = std::min(rect[i].x - rect[i].y, diff_min);
+        sum_max = (rect[i].x + rect[i].y > sum_max) ? (rect[i].x + rect[i].y) : sum_max;
+        sum_min = (rect[i].x + rect[i].y < sum_min) ? (rect[i].x + rect[i].y) : sum_min;
+        diff_max = (rect[i].x - rect[i].y > diff_max) ? (rect[i].x - rect[i].y) : diff_max;
+        diff_min = (rect[i].x - rect[i].y < diff_min) ? (rect[i].x - rect[i].y) : diff_min;
         
         //If we updated one on this iteration, save which iteration we were on.
         //After all 4 iterations, these 4 values should be all different and in [0,3]
@@ -213,7 +245,7 @@ std::vector<cv::Point> xbot_orderpts(cv::Mat img, std::vector<cv::Point> rect)
         idx_diff_max = (diff_max == rect[i].x - rect[i].y) ? i : idx_diff_max;
         idx_diff_min = (diff_min == rect[i].x - rect[i].y) ? i : idx_diff_min;
     }
-
+    
     //Order the output vector appropriately:
     //Top-left has smallest sum
     //Bottom-right has largest sum
