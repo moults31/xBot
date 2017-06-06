@@ -8,22 +8,37 @@
 
 #include "xBot.hpp"
 
+/******************************************************
+ * Algorithm done in 3 steps:
+ * 1) Detect edge of tv screen
+ * 2) Transform perspective to fill image with tv screen
+ * 3) Read text from tv screen
+ ******************************************************
+ */
+
+
+/******************************************************
+ * METHODS FOR 1) DETECT EDGE OF TV SCREEN
+ ******************************************************
+ */
+
 /* xbot_resize
  *
  * Brief:     Resize an input image to 500px width, retaining aspect ratio.
  *
  * Param img: Image to be resized
+ * Param img_resized: Pointer to destination for resized image
  *
- * Return:    Resized image
+ * Return ratio: Factor by which we resized the original image
  */
-cv::Mat xbot_resize(cv::Mat img)
+double xbot_resize(cv::Mat img, cv::Mat *img_resized)
 {
     double ratio = 500.0/img.cols;
     double height = ratio*img.rows;
     cv::Size size(500,height);
-    cv::resize(img,img,size);
+    cv::resize(img,*img_resized,size);
     
-    return img;
+    return ratio;
 }
 
 /* xbot_detectEdge
@@ -103,3 +118,35 @@ void xbot_findScreenFrame(const cv::Mat img_edge)
     
     cvWaitKey(0);
 }
+
+/**********************************************************************
+ * METHODS FOR 2) TRANSFORM PERSPECTIVE TO FILL IMAGE WITH TV SCREEN
+ **********************************************************************
+ */
+
+///* xbot_perspectiveXform
+// *
+// * Brief:     Transform perspective to fill image with "tv screen"
+// *
+// * Param img: Raw photograph
+// */
+//void xbot_perspectiveXform(cv::Mat img, std::vector<cv::Point> rect)
+//{
+//    cv::Mat img = img_edge.clone();
+//    
+//    
+//}
+//
+///* xbot_orderpts
+// *
+// * Brief:     Order points in the point vector that defines the tv screen corners.
+//  
+// *
+// * Param img: Raw photograph
+// */
+//void xbot_perspectiveXform(cv::Mat img, std::vector<cv::Point> rect)
+//{
+//    cv::Mat img = img_edge.clone();
+//    
+//    
+//}
