@@ -12,7 +12,6 @@
 		926294551EE61336009262DC /* libopencv_imgproc.3.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 926294541EE61336009262DC /* libopencv_imgproc.3.2.0.dylib */; };
 		926294571EE613C6009262DC /* libopencv_highgui.3.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 926294561EE613C6009262DC /* libopencv_highgui.3.2.0.dylib */; };
 		926294591EE6150E009262DC /* libopencv_imgcodecs.3.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 926294581EE6150E009262DC /* libopencv_imgcodecs.3.2.0.dylib */; };
-		92EB5FF31EE6E55D005655CD /* xbot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92EB5FF11EE6E55D005655CD /* xbot.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -34,8 +33,6 @@
 		926294541EE61336009262DC /* libopencv_imgproc.3.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_imgproc.3.2.0.dylib; path = ../../../../../../usr/local/lib/libopencv_imgproc.3.2.0.dylib; sourceTree = "<group>"; };
 		926294561EE613C6009262DC /* libopencv_highgui.3.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_highgui.3.2.0.dylib; path = ../../../../../../usr/local/lib/libopencv_highgui.3.2.0.dylib; sourceTree = "<group>"; };
 		926294581EE6150E009262DC /* libopencv_imgcodecs.3.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_imgcodecs.3.2.0.dylib; path = ../../../../../../usr/local/lib/libopencv_imgcodecs.3.2.0.dylib; sourceTree = "<group>"; };
-		92EB5FF11EE6E55D005655CD /* xbot.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = xbot.cpp; sourceTree = "<group>"; };
-		92EB5FF21EE6E55D005655CD /* xbot.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = xbot.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,8 +71,6 @@
 			isa = PBXGroup;
 			children = (
 				926293CB1EE60DD3009262DC /* main.cpp */,
-				92EB5FF11EE6E55D005655CD /* xbot.cpp */,
-				92EB5FF21EE6E55D005655CD /* xbot.hpp */,
 			);
 			path = opencv_scratch;
 			sourceTree = "<group>";
@@ -148,7 +143,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				92EB5FF31EE6E55D005655CD /* xbot.cpp in Sources */,
 				926293CC1EE60DD3009262DC /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

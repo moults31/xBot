@@ -56,11 +56,11 @@ cv::Mat xbot_resize(cv::Mat img)
 
 /* xbot_detectEdge
  * 
- * Brief:     Resize an input image to 500px width, retaining aspect ratio.
+ * Brief:     Produce Canny edge detected image from raw photograph
  *
- * Param img: Image to be resized
+ * Param img: Raw photograph
  *
- * Return:    Resized image
+ * Return:    Edge grayscale image
  */
 cv::Mat xbot_detectEdge(cv::Mat img)
 {
@@ -93,6 +93,12 @@ struct
     }
 } areaComp;
 
+/* xbot_findScreenFrame
+ *
+ * Brief:     Find rectangle corresponding to tv screen frame
+ *
+ * Param img_edge: Edge grayscale image
+ */
 void xbot_findScreenFrame(const cv::Mat img_edge)
 {
     cv::Mat img = img_edge.clone();
