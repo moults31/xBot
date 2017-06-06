@@ -88,9 +88,14 @@ struct
  *
  * Return: Vector that defines the tv screen corners.
  */
-std::vector<cv::Point> xbot_findScreenFrame(const cv::Mat img_edge)
+std::vector<cv::Point> xbot_findScreenFrame(const cv::Mat img)
 {
-    cv::Mat img = img_edge.clone();
+    //Resize image to 500px width
+    cv::Mat img_resized = img.clone();
+    double ratio = xbot_resize(img, &img_resized);
+    
+    //Filter image with Canny edge detector
+    cv::Mat img_edge = xbot_detectEdge(img_resized);
     
     std::vector<std::vector<cv::Point> > cnts;
     cv::findContours(img_edge, cnts, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
@@ -98,7 +103,7 @@ std::vector<cv::Point> xbot_findScreenFrame(const cv::Mat img_edge)
     std::sort(cnts.begin(), cnts.end(), areaComp);
     
     double peri;
-    std::vector<cv::Point> approx, screenCnt;
+    std::vector<cv::Point> approx, rect;
     int contourIdx;
     
     for(size_t c = 0; c < cnts.size(); c++)
@@ -114,11 +119,20 @@ std::vector<cv::Point> xbot_findScreenFrame(const cv::Mat img_edge)
             break;
         }
     }
+    
+    for(int i = 0; i < cnts[contourIdx].size(); i++)
+    {
+        cnts[contourIdx][i].x /= ratio;
+        cnts[contourIdx][i].y /= ratio;
+    }
+    
     cv::Scalar color = cv::Scalar( 255, 255, 255 );
     cv::drawContours(img, cnts, contourIdx, color, 5, 8);
     cv::imshow("Outline", img);
     
-    return approx;
+    rect = approx;
+    
+    return rect;
 }
 
 /**********************************************************************

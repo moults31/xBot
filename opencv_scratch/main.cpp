@@ -20,19 +20,8 @@
 int main(int argc, const char * argv[])
 {
     cv::Mat img = cv::imread("/Users/moults31/GoogleDrive/secret_hax/IMG_0419.png");
-
-    cv::Mat img_resized = img.clone();
-    double ratio = xbot_resize(img, &img_resized);
     
-    cv::Mat img_edge = xbot_detectEdge(img_resized);
-    
-    std::vector<cv::Point> rect = xbot_findScreenFrame(img_edge);
-    
-    for(int i = 0; i < rect.size(); i++)
-    {
-        rect[i].x /= ratio;
-        rect[i].y /= ratio;
-    }
+    std::vector<cv::Point> rect = xbot_findScreenFrame(img);
     
     std::vector<cv::Point> rect_ordered = xbot_orderpts(img, rect);
     
