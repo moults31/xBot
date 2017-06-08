@@ -12,6 +12,8 @@
 		926294551EE61336009262DC /* libopencv_imgproc.3.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 926294541EE61336009262DC /* libopencv_imgproc.3.2.0.dylib */; };
 		926294571EE613C6009262DC /* libopencv_highgui.3.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 926294561EE613C6009262DC /* libopencv_highgui.3.2.0.dylib */; };
 		926294591EE6150E009262DC /* libopencv_imgcodecs.3.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 926294581EE6150E009262DC /* libopencv_imgcodecs.3.2.0.dylib */; };
+		92AA141B1EE9CFBB00C637AF /* libtesseract.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 92AA141A1EE9CFBB00C637AF /* libtesseract.dylib */; };
+		92AA141D1EE9D30600C637AF /* liblept.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 92AA141C1EE9D30600C637AF /* liblept.dylib */; };
 		92F62DB11EE728DC00D67236 /* xBot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92F62DAF1EE728DC00D67236 /* xBot.cpp */; };
 /* End PBXBuildFile section */
 
@@ -34,6 +36,8 @@
 		926294541EE61336009262DC /* libopencv_imgproc.3.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_imgproc.3.2.0.dylib; path = ../../../../../../usr/local/lib/libopencv_imgproc.3.2.0.dylib; sourceTree = "<group>"; };
 		926294561EE613C6009262DC /* libopencv_highgui.3.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_highgui.3.2.0.dylib; path = ../../../../../../usr/local/lib/libopencv_highgui.3.2.0.dylib; sourceTree = "<group>"; };
 		926294581EE6150E009262DC /* libopencv_imgcodecs.3.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_imgcodecs.3.2.0.dylib; path = ../../../../../../usr/local/lib/libopencv_imgcodecs.3.2.0.dylib; sourceTree = "<group>"; };
+		92AA141A1EE9CFBB00C637AF /* libtesseract.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libtesseract.dylib; path = ../../../../../../usr/local/Cellar/tesseract/3.05.01/lib/libtesseract.dylib; sourceTree = "<group>"; };
+		92AA141C1EE9D30600C637AF /* liblept.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = liblept.dylib; path = ../../../../../../usr/local/Cellar/leptonica/1.74.1/lib/liblept.dylib; sourceTree = "<group>"; };
 		92F62DAF1EE728DC00D67236 /* xBot.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = xBot.cpp; sourceTree = "<group>"; };
 		92F62DB01EE728DC00D67236 /* xBot.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = xBot.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -47,6 +51,8 @@
 				926294531EE61330009262DC /* libopencv_core.3.2.0.dylib in Frameworks */,
 				926294551EE61336009262DC /* libopencv_imgproc.3.2.0.dylib in Frameworks */,
 				926294591EE6150E009262DC /* libopencv_imgcodecs.3.2.0.dylib in Frameworks */,
+				92AA141B1EE9CFBB00C637AF /* libtesseract.dylib in Frameworks */,
+				92AA141D1EE9D30600C637AF /* liblept.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,6 +89,8 @@
 		926293D21EE60E05009262DC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				92AA141C1EE9D30600C637AF /* liblept.dylib */,
+				92AA141A1EE9CFBB00C637AF /* libtesseract.dylib */,
 				926294581EE6150E009262DC /* libopencv_imgcodecs.3.2.0.dylib */,
 				926294561EE613C6009262DC /* libopencv_highgui.3.2.0.dylib */,
 				926294541EE61336009262DC /* libopencv_imgproc.3.2.0.dylib */,
@@ -250,7 +258,11 @@
 					/usr/local/include,
 					/Users/moults31/,
 				);
-				LIBRARY_SEARCH_PATHS = "/usr/local/lib/**";
+				LIBRARY_SEARCH_PATHS = (
+					"/usr/local/lib/**",
+					/usr/local/Cellar/tesseract/3.05.01/lib,
+					/usr/local/Cellar/leptonica/1.74.1/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -262,7 +274,11 @@
 					/usr/local/include,
 					/Users/moults31/,
 				);
-				LIBRARY_SEARCH_PATHS = "/usr/local/lib/**";
+				LIBRARY_SEARCH_PATHS = (
+					"/usr/local/lib/**",
+					/usr/local/Cellar/tesseract/3.05.01/lib,
+					/usr/local/Cellar/leptonica/1.74.1/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

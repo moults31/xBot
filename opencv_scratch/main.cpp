@@ -14,19 +14,28 @@
 //
 
 #include <iostream>
-#include <opencv2/opencv.hpp>
 #include "xbot.hpp"
 
 int main(int argc, const char * argv[])
 {
     //Load image to process
     cv::Mat img = cv::imread("/Users/moults31/GoogleDrive/secret_hax/IMG_0419.png");
-    
+
     //Find the frame of the tv screen
     std::vector<cv::Point2f> rect = xbot_findScreenFrame(img);
     
     //Transform perspective
     cv::Mat img_warped = xbot_perspectiveXform(img, rect);
+    
+    //Initialize ocr and check for errors
+    tesseract::TessBaseAPI& ocr = *new tesseract::TessBaseAPI;
+    if (ocr.Init(NULL, "eng")) {
+        fprintf(stderr, "Could not initialize tesseract.\n");
+        exit(1);
+    }
+    
+    //Get user's coin balance
+    int bal = xbot_getCoinBalance(img_warped, ocr);
     
     cvWaitKey(0);
     cv::destroyAllWindows();

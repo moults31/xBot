@@ -6,6 +6,7 @@
 //  Copyright © 2017 Xbot. All rights reserved.
 //
 
+
 #include "xBot.hpp"
 #include <math.h>
 
@@ -24,12 +25,12 @@
 
 /* xbot_resize
  *
- * Brief:     Resize an input image to 500px width, retaining aspect ratio.
+ * Brief:             Resize an input image to 500px width, retaining aspect ratio.
  *
- * Param img: Image to be resized
+ * Param img:         Image to be resized
  * Param img_resized: Pointer to destination for resized image
  *
- * Return ratio: Factor by which we resized the original image
+ * Return ratio:      Factor by which we resized the original image
  */
 double xbot_resize(cv::Mat img, cv::Mat *img_resized)
 {
@@ -76,26 +77,13 @@ cv::Mat xbot_detectEdge(cv::Mat img)
     return img_edge;
 }
 
-/* xbot_areaComp
- *
- * Brief:     Struct for use with std::sort only within xbot_findScreenFrame
- *            Returns true if area within contour a is greater than that within contour b
- */
-struct
-{
-    bool operator()(std::vector<cv::Point> a, std::vector<cv::Point> b) const
-    {
-        return cv::contourArea(a) > cv::contourArea(b);
-    }
-} xbot_areaComp;
-
 /* xbot_findScreenFrame
  *
- * Brief:     Find rectangle corresponding to tv screen frame
+ * Brief:          Find rectangle corresponding to tv screen frame
  *
  * Param img_edge: Edge grayscale image
  *
- * Return: Vector that defines the tv screen corners.
+ * Return:         Vector that defines the tv screen corners.
  */
 std::vector<cv::Point2f> xbot_findScreenFrame(const cv::Mat img)
 {
@@ -206,9 +194,9 @@ cv::Mat xbot_perspectiveXform(const cv::Mat img, std::vector<cv::Point2f> rect)
 
 /* xbot_orderpts
  *
- * Brief:     Order points in the point vector that defines the tv screen corners.
+ * Brief:      Order points in the point vector that defines the tv screen corners.
  *
- * Param img: Raw photograph
+ * Param img:  Raw photograph
  * Param rect: Vector that defines the tv screen corners.
  *
  * Return rect_ordered: rect but with points in the order top-left, top-right, bottom-right, bottom-left
@@ -257,4 +245,96 @@ std::vector<cv::Point2f> xbot_orderpts(std::vector<cv::Point2f> rect)
     rect_ordered[3] = rect[idx_diff_max];
     
     return rect_ordered;
+}
+
+
+/**********************************************************************
+ * METHODS FOR 3) PARSE TEXT FROM TV SCREEN
+ **********************************************************************
+ */
+
+/* xbot_crop
+ *
+ * Brief:        Crop image to specified region of interest.
+ *
+ * Param img_in: Image to crop.
+ * Param roi:    Region of image to return.
+ *
+ * Return img_cropped: Section of img_in specified by roi argument.
+ */
+cv::Mat xbot_crop(cv::Mat img_in, xbot_roi_t roi)
+{
+    //Initialize roi as entire img_in
+    int roi_x = 0;
+    int roi_y = 0;
+    int roi_width = (int) img_in.size().width;
+    int roi_height = (int) img_in.size().height;
+    
+    //set the roi x,y,width,height parameters based on the
+    //section of the image we need to return
+    switch(roi)
+    {
+        case COIN_BALANCE:
+            //Limit region of interest to coin balance.
+            //Use ratios of width and height from testing.
+            roi_x = (int) (img_in.size().width * 2.0 / 3.0);
+            roi_y = 0;
+            roi_width = (int) (img_in.size().width * 1.0 / 3.0);
+            roi_height = (int) (img_in.size().height / 7.0);
+            break;
+            
+        case XBOT_ROI_MAX:
+        default:
+            std::cout << "\nSpecified an undefined region of interest to crop.";
+            std::cout << "\nReturning img_in untouched.\n";
+    }
+    
+    //crop the image and display the result in a window
+    cv::Mat img_cropped = img_in(cv::Rect(roi_x, roi_y, roi_width, roi_height));
+    cv::imshow("Cropped", img_cropped);
+    
+    return img_cropped;
+}
+
+/* xbot_parseText
+ *
+ * Brief:        Parse the text in a given image
+ *
+ * Param img:    Image to get text from.
+ * Param ocr:    Tesseract ocr object to use.
+ *
+ * Return out:   Pointer to head of string containing text.
+ */
+char *xbot_parseText(cv::Mat img, tesseract::TessBaseAPI& ocr)
+{
+    ocr.SetImage((uchar*)img.data, img.size().width, img.size().height, img.channels(), (int)img.step1());
+    ocr.Recognize(0);
+    char* out = ocr.GetUTF8Text();
+    return out;
+}
+
+/* xbot_getCoinBalance
+ *
+ * Brief:        Get the user's current coin balance
+ *
+ * Param img:    Image to get text from
+ * Param ocr:    Tesseract ocr object to use.
+ *
+ * Return balval:   Coin balance value as an int
+ */
+int xbot_getCoinBalance(cv::Mat img, tesseract::TessBaseAPI& ocr)
+{
+    //crop the og image to get only the coin balance tile
+    cv::Mat img_cropped = xbot_crop(img, COIN_BALANCE);
+    cv::imshow("sub", img_cropped);
+
+    //generate and report a string containing the text on the coin balance tile
+    char* bal = xbot_parseText(img_cropped, ocr);
+    std::cout << bal;
+    
+    //extract the coin value as an int from the string
+    //@TODO
+    int balval = 0;
+    
+    return balval;
 }
